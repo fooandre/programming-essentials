@@ -1,7 +1,7 @@
 # Author: Andre Foo
 # Admin No: 210119U
 
-prompt_user = True
+prompt_user = False
 
 while prompt_user:
     is_user_vendor = input("Are you a vendor (Y/N)? ")
@@ -13,31 +13,13 @@ while prompt_user:
         "Please enter a valid answer"
     )
 
-drink_menu = [
-    "IM. Iced Milo (S$1.5)",
-    "HM. Hot Milo (S$1.2)",
-    "IC. Iced Coffee (S$1.5)",
-    "HC. Hot Coffee (S$1.2)", "1P. 100 Plus (S$1.1)",
-    "CC. Coca Cola (S$1.3)",
-    "0. Exit / Payment"
-]
-
-drink_list = {
-    "IM": 1.5,
-    "HM": 1.2,
-    "IC": 1.5,
-    "HC": 1.2,
-    "1P": 1.1,
-    "CC": 1.3
+inventory = {
+    'IM': {'description': 'Iced Milo', 'price': 1.5, 'quantity': 30},
+    'IC': {'description': 'Iced Coffee', 'price': 1.5, 'quantity': 40},
+    'CC': {'description': 'Coca Cola', 'price': 1.3, 'quantity': 50}
 }
 
-vendor_menu = [
-    "1. Add Drink Type",
-    "2. Replenish Drink",
-    "0. Exit"
-]
-
-vendor_list = {
+vendor_menu = {
     "1": "Add Drink Type",
     "2": "Replenish Drink",
     "0": "Mkay bye"
@@ -46,13 +28,53 @@ vendor_list = {
 notes_accepted = [10, 5, 2]
 
 
-def display_menu(vendor):
-    menu = vendor_menu if vendor else drink_menu
+def add_drink_type():
+    prompt_user = True
 
-    print("Welcome to ABC Vending Machine. \nSelect from following choices to continue:")
+    while prompt_user:
+        drink_id = input("Enter drink id: ")
+
+        drink_id = drink_id.upper()
+
+        prompt_user = False if inventory.get(drink_id) != None else True
+
+        try:
+            description = input("Enter description of drink: ")
+            error_message = "PLease enter a valid description"
+            description = description.capitalize()
+
+            price = input("Enter price: $ ")
+            error_message = "PLease enter a valid price"
+            price = int(price)
+
+            quantity = input("Enter quantity: ")
+            error_message = "PLease enter a valid number"
+            quantity = int(quantity)
+        except:
+            return error_message
+
+
+# add_drink_type()
+# drink_id = "JT"
+# description = "Jasmine Tea"
+# price = 2.3
+# quantity = 50
+# inventory.update(
+#     {drink_id: {"description": description, "price": price, "quantity": quantity}}
+# )
+# for drink in inventory:
+#     print(drink)
+
+
+def display_menu(vendor):
+    menu = vendor_menu if vendor else inventory
+
+    print("Welcome to ABC Vending Machine.\nSelect from following choices to continue:")
 
     for item in menu:
-        print(item)
+        list = f"{item}. {menu[item]}" if vendor else f"{item}. {menu[item].get('description')} (S${menu[item].get('price')}"
+
+        print(list)
 
 
 def get_user_input(vendor):
@@ -61,30 +83,25 @@ def get_user_input(vendor):
     total = 0
     drinks_selected = 0
 
-    if vendor:
+    while user_is_choosing:
         user_input = input("Enter choice: ")
-        try:
-            print(vendor_list[user_input])
-            return vendor_list[user_input]
-        except:
-            print("Invalid option")
-    else:
-        while user_is_choosing:
-            user_input = input("Enter choice: ")
 
+        try:
             if user_input == "0":
                 user_is_choosing = False
                 return total
 
-            try:
-                user_input = user_input.upper()
+            if vendor:
+                print(vendor_menu[user_input])
+                return vendor_menu[user_input]
 
-                total += drink_list[user_input]
-                drinks_selected += 1
+            user_input = user_input.upper()
 
-                print(f"No. of drinks selected: {drinks_selected}")
-            except:
-                print("Invalid option")
+            total += inventory[user_input].get("price")
+            drinks_selected += 1
+            print(f"No. of drinks selected: {drinks_selected}")
+        except:
+            print("Invalid option")
 
 
 def calculate_total():
@@ -95,7 +112,7 @@ def ask_for_payment(owed):
     if owed == 0:
         print("Mkay bye")
     else:
-        print(f"Please pay: {round(owed, 3)}\nIndicate your payment: ")
+        print(f"Please pay: ${round(owed, 2)}0\nIndicate your payment: ")
 
         amount_paid = 0
         enough_paid = False
@@ -106,12 +123,13 @@ def ask_for_payment(owed):
             try:
                 notes_given = int(notes_given)
                 amount_paid += notes_given * note_value
-                change_owed = amount_paid - owed
                 enough_paid = True if amount_paid >= owed else False
 
                 if enough_paid:
+                    change_owed = amount_paid - owed
+
                     print(
-                        f"Please collect your change: ${change_owed}\nDrinks paid. Thank you."
+                        f"Please collect your change: ${change_owed}0\nDrinks paid. Thank you."
                     )
 
                     return
@@ -129,14 +147,15 @@ def cancel_transaction(owed):
     cancel = cancel.upper()
 
     if cancel != "Y" and cancel != "N":
-        return "Please enter a valid answer"
+        print("Please enter a valid answer")
+        return cancel_transaction(owed)
 
     print("Purchase is cancelled. Thank you.") if cancel == "Y" else ask_for_payment(owed)
 
 
 def vending_machine_UI(vendor):
     display_menu(vendor)
-    get_user_input(vendor) if vendor else ask_for_payment(calculate_total())
+    get_user_input(True) if vendor else ask_for_payment(calculate_total())
 
 
-vending_machine_UI(user_is_vendor)
+# vending_machine_UI(user_is_vendor)

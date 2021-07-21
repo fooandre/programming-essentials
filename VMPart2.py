@@ -4,21 +4,15 @@
 from inspect import signature
 
 prompt_user = True
-
 while prompt_user:
-    # check if user is vendor
-    is_user_vendor = input("Are you a vendor (Y/N)? ")
+    # check if user is vendor, covert input to uppercase to reduce number of checks needed
+    is_user_vendor = input("Are you a vendor (Y/N)? ").upper()
 
-    # convert all user input to uppercase
-    is_user_vendor = is_user_vendor.upper()
-
-    # update prompt_user to False if input is valid, else keep it as True
-    prompt_user = False if is_user_vendor == 'Y' else False if is_user_vendor == 'N' else True
-
-    # if user input is valid, store user as vendor based on user input, else ask user to enter valid answer
-    user_is_vendor = True if is_user_vendor == "Y" else False if is_user_vendor == "N" else print(
-        "Please enter a valid answer"
-    )
+    if is_user_vendor == "Y" or is_user_vendor == "N":
+        prompt_user = False
+        user_is_vendor = True if is_user_vendor == "Y" else False if is_user_vendor == "N" else None
+    else:
+        print("Please enter a valid answer")
 
 # dictionary of drinks in menu containing price and description
 drinks = {
@@ -45,17 +39,15 @@ int_params = ["price", "quantity"]
 
 # handles adding new drink into inventory
 def add_drink_type(drink_id, description, price, quantity):
-    if drink_id not in drinks:
-        drinks.update(
-            {
-                drink_id: {
-                    "description": description,
-                    "price": price,
-                    "quantity": quantity}
+    drinks.update(
+        {
+            drink_id: {
+                "description": description,
+                "price": price,
+                "quantity": quantity
             }
-        )
-    else:
-        print("Drink id exists!")
+        }
+    )
 
 
 add_drink_params = signature(add_drink_type).parameters
@@ -73,24 +65,25 @@ def handle_add_drink():
 
             arg = input(f"Enter {param}: ")
 
-            try:
-                if param in int_params:
-                    arg = float(arg)
-                elif arg != "":
-                    arg = arg.upper() if param == "drink_id" else arg
-                else:
-                    invalid_input = True
+            if arg != "":
+                arg = int(arg) if param in int_params else arg.upper(
+                ) if param == "drink_id" else arg
 
-                args.append(arg) if not invalid_input else none
+                if param == "drink_id" or param == "description":
+                    if arg in drinks:
+                        print("Drink id exists!")
+                        continue
 
-                if args[0] in drinks:
-                    print("Drink id exists!")
-                    args = []
-                else:
-                    break
+                    if arg.isnumeric():
+                        print("Please enter a valid drink id")
+                        continue
 
-            except:
-                print('Please enter a valid', param)
+                args.append(arg)
+                break
+            else:
+                print("Please enter a valid", param)
+
+            invalid_input = True
 
     add_drink_type(*args)
 
@@ -179,7 +172,7 @@ def get_user_input(vendor):
 
         try:
             if vendor:
-                handle_add_drink() if choice == "1" else handle_replenish_drink() if choice == "2" else none
+                handle_add_drink() if choice == "1" else handle_replenish_drink() if choice == "2" else None
             else:
                 # capitalize user input
                 choice = choice.upper()

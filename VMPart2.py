@@ -24,9 +24,6 @@ vendor_menu = {
 # array of notes accepted for payment
 notes_accepted = [10, 5, 2]
 
-# array of parameters that have to be numbers
-int_params = ["price", "quantity"]
-
 
 # checks and returns a boolean value indicating status of user
 def user_is_vendor():
@@ -83,9 +80,11 @@ def handle_add_drink():
 
             # check type of input received
             try:
-                if param in int_params:
-                    # convert input to a number if needed
+                # convert input to a number if needed
+                if param == "price":
                     arg = float(arg)
+                elif param == "quantity":
+                    arg = int(arg)
                 else:
                     # drink ids should be in uppercase
                     if param == "drink_id":
@@ -147,9 +146,11 @@ def handle_replenish_drink():
                 continue
 
             try:
-                if param in int_params:
-                    # convert input to a number if needed
+                # convert input to a number if needed
+                if param == "price":
                     arg = float(arg)
+                elif param == "quantity":
+                    arg = int(arg)
                 else:
                     # convert drink id to be uppercase
                     arg = arg.upper()
@@ -241,6 +242,9 @@ def get_user_input(vendor):
                     # increment number of drinks selected by 1
                     drinks_selected += 1
 
+                    # decrease number of drinks selected by 1
+                    drinks[choice]["quantity"] -= 1
+
                     # print number of drinks selected
                     print(f"No. of drinks selected: {drinks_selected}")
                 else:
@@ -264,7 +268,7 @@ def ask_for_payment(owed):
         print("Mkay bye")
     else:
         # print amount owed and ask for payment
-        print(f"Please pay: {round(owed, 3)}\nIndicate your payment: ")
+        print(f"Please pay: ${round(owed, 3)}\nIndicate your payment: ")
 
         # initialise variables to store amount paid and if enough has been paid
         # set to 0 and False by default respectively

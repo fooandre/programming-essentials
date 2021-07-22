@@ -1,110 +1,121 @@
 # Author: Andre Foo
 # Admin No: 210119U
 
-# will be True until user inputs a valid answer
-prompt_user = True
-while prompt_user:
-    # check if user is vendor
-    is_user_vendor = input("Are you a vendor (Y/N)? ")
+from inspect import signature
 
-    # convert all user input to uppercase
-    is_user_vendor = is_user_vendor.upper()
-
-    # update prompt_user to False if input is valid, else keep it as True
-    prompt_user = False if is_user_vendor == 'Y' else False if is_user_vendor == 'N' else True
-
-    # if user input is valid, store user as vendor based on user input, else ask user to enter valid answer
-    user_is_vendor = True if is_user_vendor == "Y" else False if is_user_vendor == "N" else print(
-        "Please enter a valid answer"
-    )
 
 # dictionary of drinks in menu containing price and description
 drinks = {
-    "IM": {"description": "Iced Milo", "price": 1.5},
-    "HM": {"description": "Hot Milo", "price": 1.2},
-    "IC": {"description": "Iced Coffee", "price": 1.5},
-    "HC": {"description": "Hot Coffee", "price": 1.2},
-    "1P": {"description": "100 Plus", "price": 1.1},
-    "CC": {"description": "Coca Cola", "price": 1.3}
+    "IM": {"description": "Iced Milo", "price": 1.5, "quantity": 2},
+    "HM": {"description": "Hot Milo", "price": 1.2, "quantity": 20},
+    "IC": {"description": "Iced Coffee", "price": 1.5, "quantity": 2},
+    "HC": {"description": "Hot Coffee", "price": 1.2, "quantity": 0},
+    "1P": {"description": "100 Plus", "price": 1.1, "quantity": 50},
+    "CC": {"description": "Coca Cola", "price": 1.3, "quantity": 50},
+    "JT": {"description": "Jasmine Tea", "price": 2.3, "quantity": 50},
 }
 
 # dictionary of vendor menu and possible choices to choose from
 vendor_menu = {
-    "1": "Add Drink Type",
-    "2": "Replenish Drink"
+    1: "Add Drink Type",
+    2: "Replenish Drink"
 }
 
 # array of notes accepted for payment
 notes_accepted = [10, 5, 2]
 
 
+# checks and returns a boolean value indicating status of user
+def user_is_vendor():
+    # create a variable for readability
+    require_input = True
+
+    while require_input:
+        # check if user is vendor, covert input to uppercase to reduce number of checks needed
+        is_user_vendor = input("Are you a vendor (Y/N)? ").upper()
+
+        # use guard clauses to exit function early if user inputs valid answer
+        if is_user_vendor == "Y":
+            return True
+        elif is_user_vendor == "N":
+            return False
+
+        # by default, loop until valid answer is given
+        print("Please enter a valid answer")
+
+
 # dynamically displays menu depending on user's status
 def display_menu(vendor):
     # select which menu to display according to whether user is vendor
     menu = vendor_menu if vendor else drinks
+
+    # dynamically sets the last statement depending on whether user is vendor
     exit_statement = "0. Exit" if vendor else "0. Exit / Payment"
 
     print("Welcome to ABC Vending Machine. \nSelect from following choices to continue:")
 
     # iterate through and print each item in selected menu
-    for choice in menu:
+    for item in menu:
         if vendor:
-            print(f"{choice}. {vendor_menu[choice]}")
+            print(f"{item}. {vendor_menu[item]}")
         else:
-            print(
-                f"{choice}. {drinks[choice].get('description')} ({drinks[choice].get('price')})")
+            # create a variable to store description and price of each drink
+            description, price = drinks[item]['description'], drinks[item]['price']
+
+            # dynamically stores quantity of each drink, will be set to "***out of stock***" if it is 0
+            quantity = f"Qty: {drinks[item]['quantity']}" if drinks[item]['quantity'] != 0 else "***out of stock***"
+
+            # format and print all details for each item
+            print(f"{item}. {description} (S${price}) {quantity}")
 
     print(exit_statement)
 
 
 # logic for handling user input
 def get_user_input(vendor):
-    # will be True until user enters a "0"
+    # variables created for readability
     user_is_choosing = True
-
-    # initialise variables to store cost and number of drinks selected (default value set to 0), needed if user is customer
     total, drinks_selected = 0, 0
 
-    if vendor:
-        # get user input
+    # will loop indefinitely while user does not enter a "0"
+    while user_is_choosing:
         choice = input("Enter choice: ")
 
-        # return out of function if user inputs "0" so except block won't run
+        # guard clause, throws an error if user gives no input
+        if choice == "":
+            print("Invalid option")
+            continue
+
+        # break out of loop if user enters a "0"
         if choice == "0":
-            return
+            user_is_choosing = False
+            return total
 
         try:
-            # print user input
-            print(vendor_menu[choice])
-        except:
-            # throw a warning if user input is not in vendor menu and
-            # call the function again to get user input
-            print("Invalid option")
-            get_user_input(True)
-    else:
-        while user_is_choosing:
-            # get drink of user's choosing
-            drink = input("Enter choice: ")
-
-            # break out of loop if user enters a "0"
-            if drink == "0":
-                user_is_choosing = False
-                return total
-
-            try:
+            if vendor:
+                # print out what user chose
+                choice = int(choice)
+                print(vendor_menu[choice])
+            else:
                 # capitalize user input
-                drink = drink.upper()
+                choice = choice.upper()
 
-                # add cost of selected drink to total
-                total += drinks[drink].get("price")
+                # check if drink is not out of stock
+                if drinks[choice]["quantity"] != 0:
+                    # add cost of selected drink to total
+                    total += drinks[choice]["price"]
 
-                # increment number of drinks selected by 1
-                drinks_selected += 1
+                    # increment number of drinks selected by 1
+                    drinks_selected += 1
 
-                print(f"No. of drinks selected: {drinks_selected}")
-            except:
-                # throw warning if user input is not an existing drink
-                print("Invalid option")
+                    # print number of drinks selected
+                    print(f"No. of drinks selected: {drinks_selected}")
+                else:
+                    # if out of stock, throw warning
+                    print(drinks[choice]["description"], "is out of stock")
+        except:
+            # throw warning if user inputs an invalid value
+            print("Invalid option")
 
 
 # function that calls get_user_input(), improves readability
@@ -179,5 +190,7 @@ def vending_machine_UI(vendor):
     get_user_input(True) if vendor else ask_for_payment(get_total())
 
 
-# calls the highest level function
-vending_machine_UI(user_is_vendor)
+# calls the highest level function indefinitely until program is halted
+while True:
+    vending_machine_UI(user_is_vendor())
+    print("")

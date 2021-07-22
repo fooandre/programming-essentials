@@ -1,9 +1,6 @@
 # Author: Andre Foo
 # Admin No: 210119U
 
-from inspect import signature
-
-
 # dictionary of drinks in menu containing price and description
 drinks = {
     "IM": {"description": "Iced Milo", "price": 1.5, "quantity": 2},

@@ -3,7 +3,6 @@
 
 from inspect import signature
 
-
 # dictionary of drinks in menu containing price and description
 drinks = {
     "IM": {"description": "Iced Milo", "price": 1.5, "quantity": 2},
@@ -60,55 +59,27 @@ def add_drink_type(drink_id, description, price, quantity):
 add_drink_params = signature(add_drink_type).parameters
 
 
-# handles getting input for adding new drink and calling add_new_drink()
+# handles input validation for add_new_drink()
 def handle_add_drink():
-    # create an array to store parameters that will be passed
-    args = []
+    # takes in the parameters needed for add_drink_type()
+    params = signature(add_drink_type).parameters
 
-    # create variable variables for readability
-    require_input = True
+    # defines a skip condition
+    def skip_condition(drink_id):
+        if drink_id in drinks:
+            print("Drink id exists!")
+            return True
 
-    # interate and ask for input for every parameter needed
-    for param in add_drink_params:
-        while require_input:
-            arg = input(f"Enter {param}: ")
+        return False
 
-            # use guard clause to skip to next iteration if user gives no input
-            if arg == "":
-                print("Please enter a valid", param)
-                continue
+    # defines an end condition
+    def end_condition(drink_id):
+        return False
 
-            # check type of input received
-            try:
-                # convert input to a number if needed
-                if param == "price":
-                    arg = float(arg)
-                elif param == "quantity":
-                    arg = int(arg)
-                else:
-                    # drink ids should be in uppercase
-                    if param == "drink_id":
-                        arg = arg.upper()
+    # get needed params from user input
+    args = get_function_args(params, skip_condition, end_condition)
 
-                    # throw error if user inputs a number
-                    if arg.isnumeric():
-                        print("Please enter a valid", param)
-                        continue
-
-                    # throw error if drink already exists
-                    if arg in drinks:
-                        print("Drink id exists!")
-                        continue
-            except:
-                # print an error message if input received is invalid
-                print("Please enter a valid", param)
-                continue
-
-            # if input is valid, append it to an array and move on to next param
-            args.append(arg)
-            break
-
-    # call function to add drink and pass all required arguments using the unpacking operator
+    # call method for adding new drink and pass in all required params
     add_drink_type(*args)
 
 
@@ -127,8 +98,36 @@ def replenish_drink(drink_id, quantity):
 replenish_drink_params = signature(replenish_drink).parameters
 
 
-# handles getting input for replenishing drink and calling replenish_drink()
+# handles input validation for replenish_drink()
 def handle_replenish_drink():
+    # takes in the parameters needed for add_drink_type()
+    params = signature(replenish_drink).parameters
+
+    # defines a skip condition
+    def skip_condition(drink_id):
+        if drink_id not in drinks:
+            print("No drink with this drink id. Try again")
+            return True
+
+        return False
+
+    # defines an end condition
+    def end_condition(drink_id):
+        if drinks[drink_id]["quantity"] > 5:
+            print("No need to replenish. Quantity is greater than 5.")
+            return True
+
+        return False
+
+    # get needed params from user input
+    args = get_function_args(params, skip_condition, end_condition)
+
+    # call method for adding new drink and pass in all required params
+    replenish_drink(*args)
+
+
+# handles getting input for vendor functions
+def get_function_args(params, skip_condition, end_condition):
     # create an array to store parameters that will be passed
     args = []
 
@@ -136,7 +135,7 @@ def handle_replenish_drink():
     need_input = True
 
     # interate and ask for input for every parameter needed
-    for param in replenish_drink_params:
+    for param in params:
         while need_input:
             arg = input(f"Enter {param}: ")
 
@@ -153,30 +152,32 @@ def handle_replenish_drink():
                     arg = int(arg)
                 else:
                     # convert drink id to be uppercase
-                    arg = arg.upper()
+                    if param == "drink_id":
+                        arg = arg.upper()
 
                     # throw error if user inputs a number
                     if arg.isnumeric():
                         print("Please enter a valid", param)
                         continue
 
-                    # throw error if drink doesn't exist or drink quantity is greater than 5
-                    if arg not in drinks:
-                        print("No drink with this drink id. Try again.")
+                    # skip to next iteration if a certain condition is met
+                    if skip_condition(arg):
                         continue
-                    elif drinks[arg]["quantity"] > 5:
-                        print("No need to replenish. Quantity is greater than 5.")
-                        return
+
+                    # break if a certain condition is met
+                    if end_condition(arg):
+                        continue
             except:
                 # print an error message if input received is invalid
                 print("Please enter a valid", param)
                 continue
 
+            # if input is valid, append it to an array and move on to next param
             args.append(arg)
-
             break
 
-    replenish_drink(*args)
+    # return arguments received
+    return args
 
 
 # dynamically displays menu depending on user's status
@@ -229,7 +230,12 @@ def get_user_input(vendor):
         try:
             if vendor:
                 # call the respective functions that the user chooses
-                handle_add_drink() if choice == "1" else handle_replenish_drink() if choice == "2" else None
+                if choice == "1":
+                    handle_add_drink()
+                elif choice == "2":
+                    handle_replenish_drink()
+                else:
+                    print("Invalid option")
             else:
                 # capitalize user input
                 choice = choice.upper()

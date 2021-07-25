@@ -56,9 +56,6 @@ def add_drink_type(drink_id, description, price, quantity):
     )
 
 
-add_drink_params = signature(add_drink_type).parameters
-
-
 # handles input validation for add_new_drink()
 def handle_add_drink():
     # takes in the parameters needed for add_drink_type()
@@ -93,9 +90,6 @@ def replenish_drink(drink_id, quantity):
 
     # output to alert the vendor that quantity has been changed
     print(drink_id, "has been top up!")
-
-
-replenish_drink_params = signature(replenish_drink).parameters
 
 
 # handles input validation for replenish_drink()
@@ -209,9 +203,12 @@ def display_menu(vendor):
 
 # logic for handling user input
 def get_user_input(vendor):
-    # variables created for readability
+    # create variables for readability
+    global drinks_selected
+
     user_is_choosing = True
-    total, drinks_selected = 0, 0
+    total = 0
+    drinks_selected = {}
 
     # will loop indefinitely while user does not enter a "0"
     while user_is_choosing:
@@ -240,19 +237,25 @@ def get_user_input(vendor):
                 # capitalize user input
                 choice = choice.upper()
 
+                print(choice)
+
                 # check if drink is not out of stock
                 if drinks[choice]["quantity"] != 0:
                     # add cost of selected drink to total
                     total += drinks[choice]["price"]
 
-                    # increment number of drinks selected by 1
-                    drinks_selected += 1
+                    # add choice to drinks selected
+                    if choice not in drinks_selected:
+                        drinks_selected.update({choice: 1})
+                    else:
+                        drinks_selected[choice] += 1
 
-                    # decrease number of drinks selected by 1
+                    # reduce the quantity of drink by 1
                     drinks[choice]["quantity"] -= 1
 
                     # print number of drinks selected
-                    print(f"No. of drinks selected: {drinks_selected}")
+                    print(
+                        f"No. of drinks selected: {sum(drinks_selected.values())}")
                 else:
                     # if out of stock, throw warning
                     print(drinks[choice]["description"], "is out of stock")
@@ -323,8 +326,14 @@ def cancel_transaction(owed):
         print("Please enter a valid answer")
         return cancel_transaction(owed)
 
-    # cancels transaction if user wants to, else ask for payment again
-    print("Purchase is cancelled. Thank you.") if cancel == "Y" else ask_for_payment(owed)
+    # handles canceling of transaction if user wants to, else ask for payment again
+    if cancel == "Y":
+        print("Purchase is cancelled. Thank you.")
+
+        for drink in drinks_selected:
+            drinks[drink]["quantity"] += drinks_selected[drink]
+    else:
+        ask_for_payment(owed)
 
 
 # function that handles the calling of all other functions needed, depending on whether user is vendor or not

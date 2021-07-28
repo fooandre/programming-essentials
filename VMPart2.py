@@ -43,7 +43,7 @@ def user_is_vendor():
         print("Please enter a valid answer")
 
 
-# handles adding new drink into inventory
+# handles adding new drink into menu
 def add_drink_type(drink_id, description, price, quantity):
     drinks.update(
         {
@@ -189,14 +189,17 @@ def display_menu(vendor):
         if vendor:
             print(f"{item}. {vendor_menu[item]}")
         else:
-            # create a variable to store description and price of each drink
+            # create variables to store description and price of each drink
             description, price = drinks[item]['description'], drinks[item]['price']
 
             # dynamically stores quantity of each drink, will be set to "***out of stock***" if it is 0
             quantity = f"Qty: {drinks[item]['quantity']}" if drinks[item]['quantity'] != 0 else "***out of stock***"
 
+            # create variable for readability
+            left_aligned = f"{item}. {description} (S${price})"
+
             # format and print all details for each item
-            print(f"{item}. {description} (S${price}) {quantity}")
+            print(left_aligned.ljust(width), quantity)
 
     print(exit_statement)
 
@@ -236,8 +239,6 @@ def get_user_input(vendor):
             else:
                 # capitalize user input
                 choice = choice.upper()
-
-                print(choice)
 
                 # check if drink is not out of stock
                 if drinks[choice]["quantity"] != 0:
@@ -344,5 +345,18 @@ def vending_machine_UI(vendor):
 
 # calls the highest level function indefinitely until program is halted
 while True:
+    # format how drink menu is output
+    width = 0
+
+    for drink in drinks:
+        description = drinks[drink]["description"]
+        price = str(drinks[drink]["price"])
+        length = len(drink) + len(description) + len(price)
+
+        if length > width:
+            width = length + 9
+
     vending_machine_UI(user_is_vendor())
+
+    # print new line to separete previous session from new session
     print("")

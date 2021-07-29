@@ -36,7 +36,8 @@ def user_is_vendor():
         # use guard clauses to exit function early if user inputs valid answer
         if is_user_vendor == "Y":
             return True
-        elif is_user_vendor == "N":
+
+        if is_user_vendor == "N":
             return False
 
         # by default, loop until valid answer is given
@@ -184,6 +185,21 @@ def display_menu(vendor):
 
     print("Welcome to ABC Vending Machine. \nSelect from following choices to continue:")
 
+    # set the default width for alignment of output
+    width = 23
+
+    # get the last drink (new drinks get added to the back of the dictionary)
+    last_drink = list(drinks.keys())[-1]
+
+    # create variables for readability
+    description = drinks[last_drink]["description"]
+    price = str(drinks[last_drink]["price"])
+    length = len(drinks[last_drink]) + len(description) + len(price)
+
+    # if legnth of newly added drink is greater than current width of alignment, set new width
+    if length > width:
+        width = length + 9
+
     # iterate through and print each item in selected menu
     for item in menu:
         if vendor:
@@ -293,14 +309,13 @@ def ask_for_payment(owed):
             try:
                 notes_given = int(notes_given)
                 amount_paid += notes_given * note_value
-                change_owed = amount_paid - owed
                 enough_paid = True if amount_paid >= owed else False
 
                 # if enough has been paid, print amount of change given and return out of function
                 if enough_paid:
-                    print(
-                        f"Please collect your change: ${change_owed}\nDrinks paid. Thank you."
-                    )
+                    change_owed = amount_paid - owed
+                    print("Please collect your change:", change_owed)
+                    print("Drinks paid. Thank you.")
 
                     return
             except:
@@ -317,15 +332,7 @@ def ask_for_payment(owed):
 # logic to handle cancellation of transaction
 def cancel_transaction(owed):
     # ask user if they want to cancel the transaction
-    cancel = input("Do you want to cancel the purchase? Y/N: ")
-
-    # capitalize user input
-    cancel = cancel.upper()
-
-    # throws an error if user inputs an invalid reply, and recalls function
-    if cancel != "Y" and cancel != "N":
-        print("Please enter a valid answer")
-        return cancel_transaction(owed)
+    cancel = input("Do you want to cancel the purchase? Y/N: ").upper()
 
     # handles canceling of transaction if user wants to, else ask for payment again
     if cancel == "Y":
@@ -333,8 +340,15 @@ def cancel_transaction(owed):
 
         for drink in drinks_selected:
             drinks[drink]["quantity"] += drinks_selected[drink]
-    else:
-        ask_for_payment(owed)
+
+        return
+
+    if cancel == "N":
+        return ask_for_payment(owed)
+
+    # throws an error if user inputs an invalid reply, and recalls function
+    print("Please enter a valid answer")
+    cancel_transaction(owed)
 
 
 # function that handles the calling of all other functions needed, depending on whether user is vendor or not
@@ -345,17 +359,6 @@ def vending_machine_UI(vendor):
 
 # calls the highest level function indefinitely until program is halted
 while True:
-    # format how drink menu is output
-    width = 0
-
-    for drink in drinks:
-        description = drinks[drink]["description"]
-        price = str(drinks[drink]["price"])
-        length = len(drink) + len(description) + len(price)
-
-        if length > width:
-            width = length + 9
-
     vending_machine_UI(user_is_vendor())
 
     # print new line to separete previous session from new session

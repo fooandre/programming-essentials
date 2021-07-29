@@ -42,28 +42,25 @@ def user_is_vendor():
 
 
 # dynamically displays menu depending on user's status
-def display_menu(vendor):
+def display_menu(vendor, replenish=False):
     # select which menu to display according to whether user is vendor
     menu = vendor_menu if vendor else drinks
 
     # dynamically sets the last statement depending on whether user is vendor
     exit_statement = "0. Exit" if vendor else "0. Exit / Payment"
 
-    print("Welcome to ABC Vending Machine. \nSelect from following choices to continue:")
+    print("Welcome to ABC Vending Machine.\nSelect from following choices to continue:")
 
     # iterate through and print each item in selected menu
     for item in menu:
         if vendor:
             print(f"{item}. {vendor_menu[item]}")
         else:
-            # create a variable to store description and price of each drink
+            # create variables to store description and price of each drink
             description, price = drinks[item]['description'], drinks[item]['price']
 
-            # dynamically stores quantity of each drink, will be set to "***out of stock***" if it is 0
-            quantity = f"Qty: {drinks[item]['quantity']}" if drinks[item]['quantity'] != 0 else "***out of stock***"
-
-            # format and print all details for each item
-            print(f"{item}. {description} (S${price}) {quantity}")
+            # prints all details for each item
+            print(f"{item}. {description} (S${price})")
 
     print(exit_statement)
 

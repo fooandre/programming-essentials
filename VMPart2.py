@@ -175,18 +175,23 @@ def get_function_args(params, skip_condition, end_condition):
     return args
 
 
-# dynamically displays menu depending on user's status
-def display_menu(vendor):
+# set the default width for alignment of output, used in display_menu
+width = 23
+
+
+# dynamically displays menu depending on user's status and context
+def display_menu(vendor, replenish=False):
     # select which menu to display according to whether user is vendor
     menu = vendor_menu if vendor else drinks
 
     # dynamically sets the last statement depending on whether user is vendor
     exit_statement = "0. Exit" if vendor else "0. Exit / Payment"
 
-    print("Welcome to ABC Vending Machine. \nSelect from following choices to continue:")
-
-    # set the default width for alignment of output
-    width = 23
+    if replenish:
+        print("====================")
+    else:
+        print("Welcome to ABC Vending Machine.")
+        print("Select from following choices to continue:")
 
     # get the last drink (new drinks get added to the back of the dictionary)
     last_drink = list(drinks.keys())[-1]
@@ -195,6 +200,9 @@ def display_menu(vendor):
     description = drinks[last_drink]["description"]
     price = str(drinks[last_drink]["price"])
     length = len(drinks[last_drink]) + len(description) + len(price)
+
+    # reference global variable
+    global width
 
     # if legnth of newly added drink is greater than current width of alignment, set new width
     if length > width:
@@ -217,7 +225,7 @@ def display_menu(vendor):
             # format and print all details for each item
             print(left_aligned.ljust(width), quantity)
 
-    print(exit_statement)
+    print("====================") if replenish else print(exit_statement)
 
 
 # logic for handling user input
@@ -249,6 +257,7 @@ def get_user_input(vendor):
                 if choice == "1":
                     handle_add_drink()
                 elif choice == "2":
+                    display_menu(False, True)
                     handle_replenish_drink()
                 else:
                     print("Invalid option")

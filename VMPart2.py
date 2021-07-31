@@ -23,6 +23,9 @@ vendor_menu = {
 # array of notes accepted for payment
 notes_accepted = [10, 5, 2]
 
+# set the default width for alignment of output, used in display_menu
+width = 23
+
 
 # checks and returns a boolean value indicating status of user
 def user_is_vendor():
@@ -173,10 +176,6 @@ def get_function_args(params, skip_condition, end_condition):
 
     # return arguments received
     return args
-
-
-# set the default width for alignment of output, used in display_menu
-width = 23
 
 
 # dynamically displays menu depending on user's status and context

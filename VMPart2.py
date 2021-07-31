@@ -23,7 +23,7 @@ vendor_menu = {
 # array of notes accepted for payment
 notes_accepted = [10, 5, 2]
 
-# set the default width for alignment of output, used in display_menu
+# set the default width for alignment of output, used in display_menu()
 width = 23
 
 
